@@ -1,17 +1,22 @@
 export class MenuScene extends Phaser.Scene{
+    private startKey: Phaser.Input.Keyboard.Key
     
     
     constructor() {
         
         super({key : 'MenuScene'})
+        
     }
+    init(): void {
+        this.startKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X)
 
+    }
     preload(): void {
         
         this.cameras.main.setBackgroundColor(0x75472d)
 
         this.load.image('crossaint', 'images/croissant.png')
-       
+        this.load.audio('menu_theme', 'audio/Darren Curtis Music - Royalty Free 2018/Darren Curtis Music - Haven of the Faeries/Haven of the Faeries MP3.mp3')
 
     }
 
@@ -21,7 +26,7 @@ export class MenuScene extends Phaser.Scene{
         
         
         let crossaint = this.add.sprite(0,0, 'crossaint')
-        
+        //Logo/ moving Tween 
         if(crossaint){
         
 
@@ -39,6 +44,8 @@ export class MenuScene extends Phaser.Scene{
             duration: 5600,
             loop: -1
         })
+
+        //Start Text
         let text = this.add.text(
             0 , 
             0 ,
@@ -56,16 +63,34 @@ export class MenuScene extends Phaser.Scene{
             (SCENE_CENTER_Y - (SCENE_CENTER_Y/2))
         )
 
+        //Music Setup
+        let music =  this.sound.add('menu_theme', {
+            volume: 0.2,
+            loop: true
+        })
+    
+        if (!this.sound.locked)
+        {
+            // already unlocked so play
+           music.play()
+        }
+        else
+        {
+            // wait for 'unlocked' to fire and then play
+            this.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
+                music.play()
+            })
+        }
 
-
-        // this.anims.create(
-        //     {
-        //         key: 'rot_crossaint',
-        //         frameRate: 7,
-        //         frames: this.anims.generateFrameNumbers()
-        //     }
-        // )
+        //Scene swap
+        
 
     }
+
+    update(): void {
+        if (this.startKey.isDown) {
+          this.scene.start('MainScene');
+        }
+      }
 
 }

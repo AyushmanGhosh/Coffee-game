@@ -16,5 +16,5 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
       gravity: { y: 200 }
     }
   },
-  scene: [ MenuScene]
+  scene: [ MenuScene, MainScene]
 };
