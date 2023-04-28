@@ -6,3 +6,6 @@ node_modules/
 
 # Files
 .DS_STORE
+.eslintrc.json
+package-lock.json
+package.json

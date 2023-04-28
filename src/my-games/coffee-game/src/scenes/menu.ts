@@ -42,12 +42,17 @@ export class MenuScene extends Phaser.Scene{
         let text = this.add.text(
             0 , 
             0 ,
-             'Press X to start'
+             'Press X to start',
+             
+             {
+                fontFamily: 'Helvetica',
+                fontSize: '30pt',
+             } ,
              )
 
-       
+    
         text.setPosition( 
-            (SCENE_CENTER_X - (SCENE_CENTER_X/5)),
+            (SCENE_CENTER_X - (SCENE_CENTER_X/3)),
             (SCENE_CENTER_Y - (SCENE_CENTER_Y/2))
         )
 
