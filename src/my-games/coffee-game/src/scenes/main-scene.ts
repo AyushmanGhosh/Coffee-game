@@ -8,26 +8,18 @@ export class MainScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.load.image('redhat', 'images/redhat.png');
-    this.load.image('redParticle', 'images/red.png');
+    this.load.image("tiles", "maps/tilesheet_basic.png");
+    this.load.tilemapTiledJSON("map", "maps/TestMap.json");
   }
 
   create(): void {
-    const particles = this.add.particles('redParticle');
+    const map = this.make.tilemap({ key: "map" });
 
-    const emitter = particles.createEmitter({
-      speed: 100,
-      scale: { start: 0.5, end: 0 },
-      blendMode: 'ADD'
-    });
-
-    this.myRedhat = new Redhat({
-      scene: this,
-      x: 400,
-      y: 300,
-      texture: 'redhat'
-    });
-
-    emitter.startFollow(this.myRedhat);
+    // Parameters are the name you gave the tileset in Tiled and then the key of the tileset image in
+    // Phaser's cache (i.e. the name you used in preload)
+    const tileset = map.addTilesetImage("TestTileset", "tiles");
+  
+    // Parameters: layer name (or index) from Tiled, tileset, x, y
+    const worldLayer = map.createLayer("Tile Layer 1", tileset, 0, 0);
   }
 }
