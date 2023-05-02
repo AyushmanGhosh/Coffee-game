@@ -9,19 +9,33 @@ export class MainScene extends Phaser.Scene {
   }
 
   preload(): void {
+    //Set camera options
     this.cameras.main.setBackgroundColor(0x000000);
-    // this.load.image('doors', 'maps/TopDownHouse_DoorsAndWindows.png');
-    this.load.image('doors_windows', 'maps/TopDownHouse_DoorsAndWindows.png');
-    this.load.image('floor_walls', 'maps/TopDownHouse_FloorsAndWalls.png');
-    this.load.image('furniture_1', 'maps/TopDownHouse_FurnitureState1.png');
+    //Load all relevant spritesheets
     this.load.spritesheet(
-      'player',
+      'player_idle',
       'images/character_sprites/Blue_witch/B_witch_idle.png',
       {
         frameWidth: 32,
         frameHeight: 48
       }
     );
+
+    this.load.spritesheet(
+      'player_run',
+      '/images/character_sprites/Blue_witch/B_witch_run.png',
+      {
+        frameWidth: 32,
+        frameHeight: 48
+      }
+    );
+
+    //Load images and general tilesets
+
+    this.load.image('doors_windows', 'maps/TopDownHouse_DoorsAndWindows.png');
+    this.load.image('floor_walls', 'maps/TopDownHouse_FloorsAndWalls.png');
+    this.load.image('furniture_1', 'maps/TopDownHouse_FurnitureState1.png');
+
     this.load.image('furniture_2', 'maps/TopDownHouse_FurnitureState2.png');
     this.load.image('smallObjects', 'maps/TopDownHouse_SmallItems.png');
     this.load.tilemapTiledJSON('map', 'maps/Cafe_main_floor.json');
@@ -76,41 +90,53 @@ export class MainScene extends Phaser.Scene {
     wallLayer_2.setCollisionByExclusion([-1]);
 
     //Graphics Collision debug mode
-    const debugGraphics = this.add.graphics().setAlpha(0.75);
-    furnitureLayer.renderDebug(debugGraphics, {
-      tileColor: null, // Color of non-colliding tiles
-      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-    });
+    // const debugGraphics = this.add.graphics().setAlpha(0.75);
+    // furnitureLayer.renderDebug(debugGraphics, {
+    //   tileColor: null, // Color of non-colliding tiles
+    //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+    //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+    // });
 
     //Player Character controls
 
     this.player = this.physics.add.sprite(spawnPoint.x, spawnPoint.y, 'player');
+
+    // Input and player physcis
+    this.cursors = this.input.keyboard.createCursorKeys();
+
     // Player Animations
 
     this.anims.create({
       key: 'idle',
-      frames: this.anims.generateFrameNames('player', {
+      frames: this.anims.generateFrameNames('player_idle', {
         start: 0,
-        end: 8
+        end: 5
       }),
       frameRate: 8,
       repeat: -1
     });
-    this.player.play('idle');
-    // Input and player physcis
-    this.cursors = this.input.keyboard.createCursorKeys();
+    // this.player.play('idle')
+    this.anims.create({
+      key: 'run',
+      frames: this.anims.generateFrameNames('player_run', {
+        start: 0,
+        end: 7
+      }),
+      frameRate: 8,
+      repeat: -1
+    });
+
+    //Camera settings
 
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.startFollow(this.player);
     this.cameras.main.roundPixels = true;
-    this.player.setScale(0.8)
+    this.player.setScale(0.8);
     this.player.setCircle(
       this.player.width / 8,
-      this.player.height / 4 - this.player.width / 21,
-      this.player.height - this.player.height/3
+      this.player.height / 2 - this.player.width / 6,
+      this.player.height - this.player.height / 4
     );
-
 
     //Add Collisions
     this.physics.add.collider(this.player, furnitureLayer);
@@ -131,16 +157,46 @@ export class MainScene extends Phaser.Scene {
     this.player.body.setVelocity(0);
     // Horizontal movement
     if (this.cursors.left.isDown) {
+      this.player.setFlipX(true);
+
       this.player.body.setVelocityX(-50);
+      this.player.play('run', true);
     } else if (this.cursors.right.isDown) {
+      this.player.setFlipX(false);
+
       this.player.body.setVelocityX(50);
+      this.player.play('run', true);
     }
     // Vertical movement
     if (this.cursors.up.isDown) {
       this.player.body.setVelocityY(-50);
+      this.player.play('run', true);
     } else if (this.cursors.down.isDown) {
       this.player.body.setVelocityY(50);
+      this.player.play('run', true);
     }
+
+    if (
+      this.cursors.up.isUp &&
+      this.cursors.down.isUp &&
+      this.cursors.right.isUp &&
+      this.cursors.left.isUp
+    ) {
+      this.player.play('idle', true);
+    }
+
+    // if (this.cursors.left.isDown) {
+    //   this.player.setFlipX(false);
+    //   this.player.setVelocityX(-160);
+    //   this.player.anims.play('walk', true);
+    // } else if (this.cursors.right.isDown) {
+    //   this.player.setFlipX(true);
+    //   this.player.setVelocityX(160);
+    //   this.player.anims.play('walk', true);
+    // } else {
+    //   this.player.setVelocityX(0);
+    //   this.player.anims.play('turn');
+    // }
     // this.player.body.velocity.normalize().scale(1);
   }
 }
