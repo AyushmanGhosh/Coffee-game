@@ -1,5 +1,3 @@
-import { Redhat } from '../objects/redhat';
-
 export class MainScene extends Phaser.Scene {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   private player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -29,9 +27,12 @@ export class MainScene extends Phaser.Scene {
         frameHeight: 48
       }
     );
+    /*
+    Load images and general tilesets
 
-    //Load images and general tilesets
 
+
+    */
     this.load.image('doors_windows', 'maps/TopDownHouse_DoorsAndWindows.png');
     this.load.image('floor_walls', 'maps/TopDownHouse_FloorsAndWalls.png');
     this.load.image('furniture_1', 'maps/TopDownHouse_FurnitureState1.png');
@@ -43,14 +44,21 @@ export class MainScene extends Phaser.Scene {
 
   create(): void {
     const map = this.make.tilemap({ key: 'map' });
+    const SCENE_CENTER_X =
+      this.cameras.main.centerX - this.cameras.main.centerX;
+    const SCENE_CENTER_Y =
+      this.cameras.main.centerY + this.cameras.main.centerY;
     const spawnPoint = map.findObject(
       'spawnPoint',
       (obj) => obj.name === 'spawnPointPlayer'
     );
-    this.cameras.main.zoomTo(5, 0);
+    /*
+    Parameters are the name you gave the tileset in Tiled and then the key of the tileset image in
+    Phaser's cache (i.e. the name you used in preload)
 
-    // Parameters are the name you gave the tileset in Tiled and then the key of the tileset image in
-    // Phaser's cache (i.e. the name you used in preload)
+
+    */
+
     const floor = map.addTilesetImage('Cafe_floor_walls', 'floor_walls');
     const wall_1 = map.addTilesetImage('Cafe_floor_walls', 'floor_walls');
     const wall_2 = map.addTilesetImage('Cafe_floor_walls', 'floor_walls');
@@ -65,8 +73,11 @@ export class MainScene extends Phaser.Scene {
       'Cafe_furniture_3',
       'smallObjects'
     );
-
+    /*
     // Parameters: layer name (or index) from Tiled, tileset, x, y
+    
+
+    */
 
     const floorLayer = map.createLayer('floor', floor, 0, 0);
     const backWallLayer = map.createLayer('backWall', backWall, 0, 0);
@@ -125,10 +136,22 @@ export class MainScene extends Phaser.Scene {
       frameRate: 8,
       repeat: -1
     });
-
+    /*
     //Camera settings
 
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+
+    */
+    this.cameras.main.zoomTo(800/240, 600/240);
+
+    this.cameras.main.setBounds(
+      0,
+      0,
+      map.widthInPixels,
+      map.heightInPixels,
+      true
+    );
+    this.cameras.main.centerOn(SCENE_CENTER_X, SCENE_CENTER_Y);
+
     this.cameras.main.startFollow(this.player);
     this.cameras.main.roundPixels = true;
     this.player.setScale(0.8);
