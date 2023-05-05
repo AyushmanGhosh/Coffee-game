@@ -55,22 +55,25 @@ export class MenuScene extends Phaser.Scene {
       SCENE_CENTER_X - SCENE_CENTER_X / 3,
       SCENE_CENTER_Y - SCENE_CENTER_Y / 2
     );
-
+      /*
     //Music Setup
-    let music = this.sound.add('menu_theme', {
-      volume: 0.2,
-      loop: true
-    });
 
-    if (!this.sound.locked) {
-      // already unlocked so play
-      music.play();
-    } else {
-      // wait for 'unlocked' to fire and then play
-      this.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
-        music.play();
-      });
-    }
+
+    */
+    // let music = this.sound.add('menu_theme', {
+    //   volume: 0.2,
+    //   loop: true
+    // });
+
+    // if (!this.sound.locked) {
+    //   // already unlocked so play
+    //   music.play();
+    // } else {
+    //   // wait for 'unlocked' to fire and then play
+    //   this.sound.once(Phaser.Sound.Events.UNLOCKED, () => {
+    //     music.play();
+    //   });
+    // }
 
     //Scene swap
   }
