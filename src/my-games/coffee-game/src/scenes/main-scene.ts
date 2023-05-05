@@ -4,9 +4,10 @@ export class MainScene extends Phaser.Scene {
   private player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private interactables: Phaser.GameObjects.GameObject[];
 
-  private interactions() {
-    console.log('TRIGGERED OVERLAP');
-    eventsCenter.emit('hover-emit');
+  private interactions(intObj) {
+    console.log('TRIGGERED OVERLAP', intObj.name);
+    
+    eventsCenter.emit('object-interact', intObj.name);
   }
 
   constructor() {
@@ -133,7 +134,9 @@ export class MainScene extends Phaser.Scene {
     // PC AND INTERACTION ZONES
     this.interactables.forEach((obj) => {
       this.physics.add.existing(obj, true);
-      this.physics.add.overlap(obj, this.player, this.interactions);
+      this.physics.add.overlap(obj, this.player, () => {
+        this.interactions(obj);
+      });
       obj.visible = false;
     });
     // PLAYER INPUT
