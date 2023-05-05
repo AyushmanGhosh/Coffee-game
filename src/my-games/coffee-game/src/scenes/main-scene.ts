@@ -3,15 +3,10 @@ export class MainScene extends Phaser.Scene {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   private player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private interactables: Phaser.GameObjects.GameObject[];
-  private zone;
 
   private interactions() {
-    console.log('triggered');
+    console.log('TRIGGERED OVERLAP');
     eventsCenter.emit('hover-emit');
-
-    // if (x.name === 'coffee') {
-    //   console.log('intersected');
-    // }
   }
 
   constructor() {
@@ -19,9 +14,14 @@ export class MainScene extends Phaser.Scene {
   }
 
   preload(): void {
-    //Set camera options
+    /* 
+      SET CAMERA OPTIONS 
+    */
     this.cameras.main.setBackgroundColor(0x000000);
-    //Load all relevant spritesheets
+    /*
+    LOAD ALL SPRITESHEETS
+
+    */
     this.load.spritesheet(
       'player_idle',
       'images/character_sprites/Blue_witch/B_witch_idle.png',
@@ -40,8 +40,7 @@ export class MainScene extends Phaser.Scene {
       }
     );
     /*
-    Load images and general tilesets
-
+        LOAD IMAGES AND GENERAL SPRITESHEETS
 
 
     */
@@ -64,11 +63,6 @@ export class MainScene extends Phaser.Scene {
       'spawnPoint',
       (obj) => obj.name === 'spawnPointPlayer'
     );
-
-    // let temp = map.getObjectLayer('interactables');
-
-    // let temp2 = this.physics.overlap();
-    // console.log(temp);
 
     /* 
     Parameters are the name you gave the tileset in Tiled and then the key of the tileset image in
@@ -114,72 +108,35 @@ export class MainScene extends Phaser.Scene {
     const doorLayer = map.createLayer('door', doorsWindows, 0, 0);
     this.interactables = map.createFromObjects('interactables', {});
     let temp;
-    // temp = this.interactables.forEach((obj) =>
-    //   console.log((obj.visible = true), obj)
-    // );
-    // this.interactables.forEach((obj) =>
-    //   obj.setInteractive({}, this.interactions)
-    // );
-    // this.interactables.forEach((obj) => (obj.on('')));
-
-    // console.log(temp);
 
     furnitureLayer.setCollisionByExclusion([-1]);
     backWallLayer.setCollisionByExclusion([-1]);
     wallLayer_1.setCollisionByExclusion([-1]);
     wallLayer_2.setCollisionByExclusion([-1]);
-    // console.log(temp);
 
     // Graphics Collision debug mode
-    // const debugGraphics = this.add.graphics().setAlpha(0.75);
-    // furnitureLayer.renderDebug(debugGraphics, {
-    //   tileColor: null, // Color of non-colliding tiles
-    //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-    //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-    // });
+
+    const debugGraphics = this.add.graphics().setAlpha(0.75);
+    furnitureLayer.renderDebug(debugGraphics, {
+      tileColor: null, // Color of non-colliding tiles
+      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+      faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+    });
 
     //Player Character controls
 
     this.player = this.physics.add.sprite(spawnPoint.x, spawnPoint.y, 'player');
     this.player.body.onOverlap = true;
 
-    let test;
-    this.interactables.forEach((x) =>
-      this.physics.add.overlap(x, this.player, this.interactions)
-    );
-    this.interactables.forEach((obj) => obj.setInteractive());
-
-    this.test = this.interactables.forEach((obj) =>
-      obj.on('hover-emit', () => {
-        console.log('Hovered over');
-        // eventsCenter.emit('hover-emit');
-      })
-    );
-
-    this.interactables.forEach((obj) => obj.update());
     // console.log(this.test);
 
-    this.physics.world.on('overlap', () => {
-      console.log('overlap detected');
-    });
-
-    // ZONE TESTING
-    // this.zone = this.add.zone(300, 200, 200, 200);
+    // PC AND INTERACTION ZONES
     this.interactables.forEach((obj) => {
       this.physics.add.existing(obj, true);
-      this.physics.add.overlap(obj, this.player, (zone, pc) => {
-        pc.setScale(0.5);
-      });
+      this.physics.add.overlap(obj, this.player, this.interactions);
       obj.visible = false;
     });
-    // this.physics.add.existing(this.zone, false);
-
-    // this.physics.add.overlap(this.zone, this.player, (zone, pc) => {
-    //   pc.setScale(3);
-    // });
-
-    // this.zone.body.moves = false;
-    // Input and player physcis
+    // PLAYER INPUT
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // Player Animations
@@ -193,7 +150,6 @@ export class MainScene extends Phaser.Scene {
       frameRate: 8,
       repeat: -1
     });
-    // this.player.play('idle')
     this.anims.create({
       key: 'run',
       frames: this.anims.generateFrameNames('player_run', {
@@ -204,7 +160,9 @@ export class MainScene extends Phaser.Scene {
       repeat: -1
     });
     /*
-    //Camera settings
+
+
+    Camera settings
 
 
     */
@@ -224,7 +182,6 @@ export class MainScene extends Phaser.Scene {
     this.player.setScale(0.8);
     this.player.setCircle(
       5,
-      // this.player.width / 8,
       this.player.height / 2 - this.player.width / 6,
       this.player.height - this.player.height / 4
     );
@@ -235,14 +192,12 @@ export class MainScene extends Phaser.Scene {
     this.physics.add.collider(this.player, wallLayer_1);
     this.physics.add.collider(this.player, wallLayer_2);
 
-    // this.physics.add.collider(this.interactables, this.player);
     this.physics.world.bounds.width = map.widthInPixels;
     this.physics.world.bounds.height = map.heightInPixels;
     this.player.setCollideWorldBounds(true);
   }
 
   update(time, delta): void {
-    // this.physics.world.on('overlap', this.interactions);
     this.player.body.setVelocity(0);
     // Horizontal movement
     if (this.cursors.left.isDown) {
@@ -264,9 +219,11 @@ export class MainScene extends Phaser.Scene {
       this.player.body.setVelocityY(50);
       this.player.play('run', true);
     }
-    if (!this.player.body.touching.none) {
-      console.log('touchingg!');
-    }
+
+    // PC OVERLAP EXAMPLE :: AVOID USING
+    // if (!this.player.body.touching) {
+    //   console.log('touchingg!');
+    // }
     if (
       this.cursors.up.isUp &&
       this.cursors.down.isUp &&
@@ -276,25 +233,6 @@ export class MainScene extends Phaser.Scene {
       this.player.play('idle', true);
     }
 
-    this.interactables.forEach((obj) =>
-      obj.on('hover-emit', () => {
-        console.log('Hoveered over');
-        // eventsCenter.emit('hover-emit');
-      })
-    );
-    // this.physics.world.on('overlap', this.interactions);
-    // if (this.cursors.left.isDown) {
-    //   this.player.setFlipX(false);
-    //   this.player.setVelocityX(-160);
-    //   this.player.anims.play('walk', true);
-    // } else if (this.cursors.right.isDown) {
-    //   this.player.setFlipX(true);
-    //   this.player.setVelocityX(160);
-    //   this.player.anims.play('walk', true);
-    // } else {
-    //   this.player.setVelocityX(0);
-    //   this.player.anims.play('turn');
-    // }
     // this.player.body.velocity.normalize().scale(1);
   }
 }
