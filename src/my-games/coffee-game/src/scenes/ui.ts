@@ -13,27 +13,44 @@ export class UiScene extends Phaser.Scene {
   private dialogueBg: Phaser.GameObjects.Rectangle;
   private dialogueText: Phaser.GameObjects.Text;
 
-  private interactions(intObj: any) {
-    this.isInteracting = true;
-    this.interactLayer.setVisible(true);
-    // Hide the interact layer after 500ms only if not still interacting
-    this.time.delayedCall(500, () => {
-      if (!this.isInteracting) {
-        this.interactLayer.setVisible(false);
-      }
-    });
+ private interactionHandlers: { [key: string]: () => void } = {
+  coffee: () => {
+    console.log('Interacting coffee boost');
+    eventsCenter.emit('coffee-minigame');
+  },
+  npc: () => {
+    console.log('Interacting with NPC');
+    eventsCenter.emit('start-dialogue', 'npc1'); // example id
+  },
+ phone: () => {
+    console.log('Interacting with phone...');
+    eventsCenter.emit('show-dialogue', 'The phone screen flickers to life with a mysterious message.');
+  }
+  // Add more interaction types here
+};
 
-    if (
-      Phaser.Input.Keyboard.JustDown(this.interactKey) &&
-      intObj === 'coffee'
-    ) {
-      console.log('Interacting coffee boost');
-      //Debug: Emitter for a coffee boost interaction
-      // eventsCenter.emit('coffee-boost');
-      eventsCenter.emit('coffee-minigame');
-      console.log('interact with', intObj);
+private interactions(intObj: any) {
+  this.isInteracting = true;
+  this.interactLayer.setVisible(true);
+
+  // Hide interaction layer after 500ms if not interacting
+  this.time.delayedCall(500, () => {
+    if (!this.isInteracting) {
+      this.interactLayer.setVisible(false);
+    }
+  });
+
+  // Only trigger on actual interaction key press
+  if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+    const handler = this.interactionHandlers[intObj];
+    if (handler) {
+      handler();
+    } else {
+      console.warn(`No interaction handler defined for: ${intObj}`);
     }
   }
+}
+
 
   constructor() {
     super({ key: 'UiScene' });
@@ -105,6 +122,11 @@ export class UiScene extends Phaser.Scene {
 
     // Register object interaction events
     eventsCenter.on('object-interact', (x: string) => this.interactions(x));
+
+    // Inside UI Scene's create() or init()
+    eventsCenter.on('show-dialogue', (text: string) => {
+      this.showDialogue(text);
+    });
   }
 
   update(time: number, delta: number): void {

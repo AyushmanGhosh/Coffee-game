@@ -278,4 +278,6 @@ export class MainScene extends Phaser.Scene {
       this.player.play('idle', true);
     }
   }
+
+  
 }
