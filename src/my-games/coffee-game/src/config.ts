@@ -1,6 +1,7 @@
 import { MainScene } from './scenes/main-scene';
 import { MenuScene } from './scenes/menu';
 import { UiScene } from './scenes/ui';
+import { CoffeeMinigameScene } from './scenes/coffee-minigame-scene';
 
 export const GameConfig: Phaser.Types.Core.GameConfig = {
   title: 'Parcel-Boilerplate',
@@ -20,5 +21,5 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
     }
   },
 
-  scene: [MenuScene, MainScene, UiScene]
+  scene: [MenuScene, MainScene, UiScene, CoffeeMinigameScene]
 };

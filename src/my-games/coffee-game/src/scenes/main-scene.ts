@@ -1,4 +1,5 @@
 import eventsCenter from '../interfaces/EventManager';
+import { getPlayerState, setPlayerState } from '../state/player-state';
 export class MainScene extends Phaser.Scene {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   private player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -147,18 +148,33 @@ export class MainScene extends Phaser.Scene {
 
     //Player Character controls
 
-    this.player = this.physics.add.sprite(spawnPoint.x, spawnPoint.y, 'player');
+    // Restore player position if available
+    const savedState = getPlayerState();
+    const startX = savedState.x || spawnPoint.x;
+    const startY = savedState.y || spawnPoint.y;
+    this.player = this.physics.add.sprite(startX, startY, 'player');
     this.player.body.onOverlap = true;
 
     // console.log(this.test);
 
-    // Player Interactions
+    // Player Interactions: Listen to events from UiScene
 
     // Listen for boost request from UiScene
     eventsCenter.on('coffee-boost', () => {
       if (!this.isBoosted) {
         this.giveCoffeeBoost();
       }
+    });
+    eventsCenter.on('coffee-minigame', () => {
+      // Save player state before switching scenes
+      setPlayerState({
+        x: this.player.x,
+        y: this.player.y,
+        velocityX: this.player.body.velocity.x,
+        velocityY: this.player.body.velocity.y,
+        isBoosted: this.isBoosted
+      });
+      this.scene.start('CoffeeMinigameScene');
     });
     // PC AND INTERACTION ZONES
     this.interactables.forEach((obj) => {

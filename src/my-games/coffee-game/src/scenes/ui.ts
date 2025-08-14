@@ -28,7 +28,9 @@ export class UiScene extends Phaser.Scene {
       intObj === 'coffee'
     ) {
       console.log('Interacting coffee boost');
-      eventsCenter.emit('coffee-boost');
+      //Debug: Emitter for a coffee boost interaction
+      // eventsCenter.emit('coffee-boost');
+      eventsCenter.emit('coffee-minigame');
       console.log('interact with', intObj);
     }
   }
