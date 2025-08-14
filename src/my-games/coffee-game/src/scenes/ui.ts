@@ -2,45 +2,51 @@ import { Tilemaps } from 'phaser';
 import eventsCenter from '../interfaces/EventManager';
 
 export class UiScene extends Phaser.Scene {
+  private isInteracting: boolean = false;
   private uiKey: Phaser.Input.Keyboard.Key;
   private interactKey: Phaser.Input.Keyboard.Key;
+  private debugKey: Phaser.Input.Keyboard.Key;
   private interactLayer: Phaser.Tilemaps.TilemapLayer;
   private guiLayer: Phaser.Tilemaps.TilemapLayer;
   private currentInteractObject: string;
+  private dialogueContainer: Phaser.GameObjects.Container;
+  private dialogueBg: Phaser.GameObjects.Rectangle;
+  private dialogueText: Phaser.GameObjects.Text;
 
-  private interactions(intObj) {
-    // console.log('Caught data', intObj);
+  private interactions(intObj: any) {
+    this.isInteracting = true;
     this.interactLayer.setVisible(true);
+    // Hide the interact layer after 500ms only if not still interacting
+    this.time.delayedCall(500, () => {
+      if (!this.isInteracting) {
+        this.interactLayer.setVisible(false);
+      }
+    });
 
-    if (this.interactKey.isDown && intObj === 'coffee') {
+    if (
+      Phaser.Input.Keyboard.JustDown(this.interactKey) &&
+      intObj === 'coffee'
+    ) {
       console.log('Interacting coffee boost');
-      eventsCenter.emit('coffee-boost'); // Tell MainScene to apply boost
-    }
-
-    if (this.interactKey.isDown && intObj === 'coffee') {
+      eventsCenter.emit('coffee-boost');
       console.log('interact with', intObj);
     }
   }
 
   constructor() {
-    super({
-      key: 'UiScene'
-    });
+    super({ key: 'UiScene' });
   }
+
   preload(): void {
     this.load.image('guiImage', 'maps/GUI.png');
     this.load.tilemapTiledJSON('gui', 'maps/Ui.json');
   }
 
   create(): void {
-    const SCENE_CENTER_X =
-      this.cameras.main.centerX - this.cameras.main.centerX;
-    const SCENE_CENTER_Y =
-      this.cameras.main.centerY + this.cameras.main.centerY;
     const gui = this.make.tilemap({ key: 'gui' });
-
     const main = gui.addTilesetImage('ui', 'guiImage');
     const interact = gui.addTilesetImage('ui', 'guiImage');
+
     this.interactLayer = gui.createLayer('interact', interact, 0);
     this.guiLayer = gui.createLayer('main', main, 0);
 
@@ -48,34 +54,88 @@ export class UiScene extends Phaser.Scene {
     this.interactKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.X
     );
+    this.debugKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.D
+    ); // DEBUG MODE
 
     if (this.guiLayer) {
-      this.guiLayer.setPosition(0, 0);
-      this.guiLayer.setScale(800 / 80, 600 / 80);
-      this.guiLayer.setVisible(false);
+      this.guiLayer
+        .setPosition(0, 0)
+        .setScale(800 / 80, 600 / 80)
+        .setVisible(false);
     }
     if (this.interactLayer) {
-      this.interactLayer.setPosition(0, 0);
-      this.interactLayer.setScale(800 / 80, 600 / 80);
-      this.interactLayer.setVisible(false);
+      this.interactLayer
+        .setPosition(0, 0)
+        .setScale(800 / 80, 600 / 80)
+        .setVisible(false);
     }
 
-    // this.cameras.main.zoomTo(5, 0);
-    // console.log(eventsCenter.listenerCount('object-interact'));
+    // Create modular dialogue box (bottom half)
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    const dialogueHeight = height / 4;
+    this.dialogueBg = this.add
+      .rectangle(
+        width / 2,
+        height - dialogueHeight / 2,
+        width,
+        dialogueHeight,
+        0x222244,
+        0.85
+      )
+      .setStrokeStyle(2, 0xffffff);
 
-    // Register event listener only once
+    this.dialogueText = this.add
+      .text(width / 2, height - dialogueHeight / 2, '', {
+        fontFamily: 'Arial',
+        fontSize: '24px',
+        color: '#fff',
+        wordWrap: { width: width - 40 }
+      })
+      .setOrigin(0.5);
+
+    this.dialogueContainer = this.add.container(0, 0, [
+      this.dialogueBg,
+      this.dialogueText
+    ]);
+    this.dialogueContainer.setVisible(false);
+
+    // Register object interaction events
     eventsCenter.on('object-interact', (x: string) => this.interactions(x));
   }
 
   update(time: number, delta: number): void {
-    if (this.uiKey.isDown) {
-      this.guiLayer.setVisible(true);
-    } else if (this.uiKey.isUp) {
-      this.guiLayer.setVisible(false);
+    // Example: Reset isInteracting if needed (e.g., based on player position or overlap end)
+    // For now, we'll reset every frame for demonstration. Replace with your own logic.
+    this.isInteracting = false;
+    // Show GUI overlay
+    this.guiLayer.setVisible(this.uiKey.isDown);
+
+    // DEBUG — Press D to toggle test dialogue
+    if (Phaser.Input.Keyboard.JustDown(this.debugKey)) {
+      if (this.dialogueContainer.visible) {
+        this.hideDialogue();
+      } else {
+        this.showDialogue(
+          'This is a DEBUG test message.\nPress D again to hide.'
+        );
+      }
     }
-    // Removed repeated event registration and rapid interactLayer toggling
-    // if (this.interactKey.isDown) {
-    //   console.log(this.interactKey, 'interact key triggerred');
-    // }
+  }
+
+  /**
+   * Show NPC dialogue in the dialogue box
+   */
+  public showDialogue(text: string) {
+    this.dialogueText.setText(text);
+    this.dialogueContainer.setVisible(true);
+  }
+
+  /**
+   * Hide the dialogue box
+   */
+  public hideDialogue() {
+    this.dialogueContainer.setVisible(false);
   }
 }
