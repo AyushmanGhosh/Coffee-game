@@ -4,9 +4,30 @@ export class MainScene extends Phaser.Scene {
   private player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private interactables: Phaser.GameObjects.GameObject[];
 
-  private interactions(intObj) {
-    console.log('TRIGGERED OVERLAP', intObj.name);
-    
+  private isBoosted: boolean = false;
+  private boostedSpeed: number = 200; // Set your desired boost speed
+  private normalSpeed: number = 100; // Set your desired normal speed
+
+  private giveCoffeeBoost(): void {
+    this.isBoosted = true;
+    console.log('Coffee boost activated!');
+
+    // Optional: You could also add a visual cue here like tinting the player
+    this.player.setTint(0xffcc00); // yellow tint for boost
+
+    // Reset boost after 5 seconds
+    this.time.delayedCall(5000, () => {
+      this.isBoosted = false;
+      console.log('Coffee boost ended.');
+
+      // Remove visual cue
+      this.player.clearTint();
+    });
+  }
+
+  private interactions(intObj: Phaser.GameObjects.GameObject) {
+    // console.log('TRIGGERED OVERLAP', intObj.name);
+
     eventsCenter.emit('object-interact', intObj.name);
   }
 
@@ -131,6 +152,14 @@ export class MainScene extends Phaser.Scene {
 
     // console.log(this.test);
 
+    // Player Interactions
+
+    // Listen for boost request from UiScene
+    eventsCenter.on('coffee-boost', () => {
+      if (!this.isBoosted) {
+        this.giveCoffeeBoost();
+      }
+    });
     // PC AND INTERACTION ZONES
     this.interactables.forEach((obj) => {
       this.physics.add.existing(obj, true);
@@ -200,33 +229,30 @@ export class MainScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
   }
 
-  update(time, delta): void {
+  update(): void {
     this.player.body.setVelocity(0);
-    // Horizontal movement
+
+    // Pick correct speed based on boost status
+    const moveSpeed = this.isBoosted ? this.boostedSpeed : this.normalSpeed;
+
     if (this.cursors.left.isDown) {
       this.player.setFlipX(true);
-
-      this.player.body.setVelocityX(-50);
+      this.player.body.setVelocityX(-moveSpeed);
       this.player.play('run', true);
     } else if (this.cursors.right.isDown) {
       this.player.setFlipX(false);
-
-      this.player.body.setVelocityX(50);
+      this.player.body.setVelocityX(moveSpeed);
       this.player.play('run', true);
     }
-    // Vertical movement
+
     if (this.cursors.up.isDown) {
-      this.player.body.setVelocityY(-50);
+      this.player.body.setVelocityY(-moveSpeed);
       this.player.play('run', true);
     } else if (this.cursors.down.isDown) {
-      this.player.body.setVelocityY(50);
+      this.player.body.setVelocityY(moveSpeed);
       this.player.play('run', true);
     }
 
-    // PC OVERLAP EXAMPLE :: AVOID USING
-    // if (!this.player.body.touching) {
-    //   console.log('touchingg!');
-    // }
     if (
       this.cursors.up.isUp &&
       this.cursors.down.isUp &&
@@ -235,7 +261,5 @@ export class MainScene extends Phaser.Scene {
     ) {
       this.player.play('idle', true);
     }
-
-    // this.player.body.velocity.normalize().scale(1);
   }
 }

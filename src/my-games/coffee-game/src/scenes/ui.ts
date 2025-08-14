@@ -13,6 +13,11 @@ export class UiScene extends Phaser.Scene {
     this.interactLayer.setVisible(true);
 
     if (this.interactKey.isDown && intObj === 'coffee') {
+      console.log('Interacting coffee boost');
+      eventsCenter.emit('coffee-boost'); // Tell MainScene to apply boost
+    }
+
+    if (this.interactKey.isDown && intObj === 'coffee') {
       console.log('interact with', intObj);
     }
   }
@@ -57,20 +62,18 @@ export class UiScene extends Phaser.Scene {
 
     // this.cameras.main.zoomTo(5, 0);
     // console.log(eventsCenter.listenerCount('object-interact'));
+
+    // Register event listener only once
+    eventsCenter.on('object-interact', (x: string) => this.interactions(x));
   }
 
-  update(time, delta): void {
+  update(time: number, delta: number): void {
     if (this.uiKey.isDown) {
       this.guiLayer.setVisible(true);
     } else if (this.uiKey.isUp) {
       this.guiLayer.setVisible(false);
     }
-    eventsCenter.on('object-interact', (x) => this.interactions(x));
-
-    this.interactLayer.setVisible(true)
-      ? this.interactLayer.setVisible(false)
-      : this.interactLayer.setVisible(true);
-
+    // Removed repeated event registration and rapid interactLayer toggling
     // if (this.interactKey.isDown) {
     //   console.log(this.interactKey, 'interact key triggerred');
     // }
