@@ -65,6 +65,10 @@ private interactions(intObj: any) {
     const gui = this.make.tilemap({ key: 'gui' });
     const main = gui.addTilesetImage('ui', 'guiImage');
     const interact = gui.addTilesetImage('ui', 'guiImage');
+    const currentDialogueLines: string[] = [];
+    const currentLineIndex: number = 0;
+    const dialogueActive: boolean = false;
+
 
     this.interactLayer = gui.createLayer('interact', interact, 0);
     this.guiLayer = gui.createLayer('main', main, 0);
@@ -151,10 +155,12 @@ private interactions(intObj: any) {
   /**
    * Show NPC dialogue in the dialogue box
    */
-  public showDialogue(text: string) {
-    this.dialogueText.setText(text);
-    this.dialogueContainer.setVisible(true);
-  }
+  public showDialogue(lines: string[] | string) {
+  this.dialogueActive = true;
+  this.currentLineIndex = 0;
+  this.currentDialogueLines = Array.isArray(lines) ? lines : [lines];
+  this.displayCurrentLine();
+}
 
   /**
    * Hide the dialogue box
